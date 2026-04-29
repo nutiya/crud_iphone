@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: crudStudent
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://postgres:5432/iphoneDB}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    # password: ${SPRING_DATASOURCE_PASSWORD:Raksa-14}
+    hikari:
+      initialization-fail-timeout: 0
+      connection-timeout: 30000
+      max-lifetime: 1800000
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:update}   # auto create/update table
+    show-sql: ${SPRING_JPA_SHOW_SQL:true}       # show SQL in console
+    properties:
+      hibernate:
+        format_sql: true

@@ -3,9 +3,9 @@ spring:
     name: crudStudent
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/iphoneDB
-    username: postgres
-    password: raksa-14
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
     hikari:
       initialization-fail-timeout: 0
       connection-timeout: 30000

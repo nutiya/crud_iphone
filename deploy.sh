@@ -4,20 +4,24 @@ NAME="spring-app"
 USERNAME="phalraksa"
 IMAGE="$USERNAME/$NAME:latest"
 
+echo "Checking tools..."
+docker --version
+kubectl version --client
+
+echo "Logging into Docker Hub..."
+echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+
 echo "Building Docker image..."
 docker build -t $IMAGE .
 
-echo "Pushing Docker image to Docker Hub..."
+echo "Pushing Docker image..."
 docker push $IMAGE
 
-echo "Apply Kubernetes manifest..."
+echo "Deploying to Kubernetes..."
 kubectl apply -f k8s/
 
-echo "Getting pods..."
+echo "Pods:"
 kubectl get pods
 
-echo "Getting services..."
+echo "Services:"
 kubectl get services
-
-echo "Fetching the main service"
-kubectl get services $NAME-service 

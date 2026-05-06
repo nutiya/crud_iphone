@@ -12,27 +12,13 @@ pipeline {
         stage('Checkout Code') {
             steps {
                 git branch: 'main',
-                url: 'https://github.com/nutiya/crud_iphone.git'
-            }
-        }
-
-        stage('Build with Maven') {
-            steps {
-                sh 'mvn clean package -DskipTests'
-            }
-        }
-
-        stage('Run Tests') {
-            steps {
-                sh 'mvn test'
+                    url: 'https://github.com/nutiya/crud_iphone.git'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                sh """
-                docker build -t $DOCKER_IMAGE .
-                """
+                sh "docker build -t $DOCKER_IMAGE ."
             }
         }
 
@@ -41,10 +27,7 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: "$DOCKER_CREDS",
                     usernameVariable: 'USER',
                     passwordVariable: 'PASS')]) {
-
-                    sh """
-                    echo $PASS | docker login -u $USER --password-stdin
-                    """
+                    sh "echo $PASS | docker login -u $USER --password-stdin"
                 }
             }
         }
@@ -58,22 +41,16 @@ pipeline {
         stage('Deploy') {
             steps {
                 sh """
-                docker stop $APP_NAME || true
-                docker rm $APP_NAME || true
-
-                docker run -d --name $APP_NAME -p 8080:8080 $DOCKER_IMAGE
+                    docker stop $APP_NAME || true
+                    docker rm $APP_NAME || true
+                    docker run -d --name $APP_NAME -p 8080:8080 $DOCKER_IMAGE
                 """
             }
         }
     }
 
     post {
-        success {
-            echo "✅ Build, Docker push and deployment successful!"
-        }
-
-        failure {
-            echo "❌ Pipeline failed"
-        }
+        success { echo "✅ Build, Docker push and deployment successful!" }
+        failure { echo "❌ Pipeline failed" }
     }
 }

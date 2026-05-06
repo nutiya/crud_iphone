@@ -4,7 +4,7 @@ pipeline {
     environment {
         APP_NAME = "spring-app"
         DOCKER_IMAGE = "phalraksa/spring-app:latest"
-        DOCKER_CREDS = "docker-hub-creds"
+        DOCKER_CREDS = "dockerhub-creds"
     }
 
     stages {

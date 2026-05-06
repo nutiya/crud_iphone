@@ -7,11 +7,6 @@ pipeline {
         DOCKER_CREDS = "docker-hub-creds"
     }
 
-    tools {
-        maven "Maven3"   // or remove if using docker maven image
-        jdk "JDK17"
-    }
-
     stages {
 
         stage('Checkout Code') {

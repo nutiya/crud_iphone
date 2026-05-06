@@ -7,12 +7,6 @@ pipeline {
 
     stages {
 
-        stage('Clone') {
-            steps {
-                git 'https://github.com/nutiya/crud_iphone.git'
-            }
-        }
-
         stage('Build') {
             steps {
                 sh 'mvn clean package -DskipTests'

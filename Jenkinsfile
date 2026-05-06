@@ -1,10 +1,10 @@
 pipeline {
-    agent any
+    agent { label 'built-in' }
 
     environment {
         APP_NAME = "spring-app"
         DOCKER_IMAGE = "phalraksa/spring-app:latest"
-        DOCKER_CREDS = "dockerhub-creds"
+        DOCKER_CREDS = "docker-hub-creds"
     }
 
     stages {

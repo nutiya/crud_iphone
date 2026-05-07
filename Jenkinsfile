@@ -34,7 +34,7 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
-                    sh """
+                    sh '''
                         export KUBECONFIG=$KUBECONFIG
                         kubectl apply -f k8s/secret.yaml
                         kubectl apply -f k8s/configmap.yaml
@@ -46,7 +46,7 @@ pipeline {
                         kubectl apply -f k8s/ingress.yaml
                         kubectl rollout restart deployment/spring-app
                         kubectl rollout status deployment/spring-app --timeout=120s
-                    """
+                    '''
                 }
             }
         }

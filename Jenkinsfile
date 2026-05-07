@@ -8,14 +8,6 @@ pipeline {
     }
 
     stages {
-        stage('Test Compose') {
-            steps {
-                sh '''
-                    docker --version
-                    docker-compose --version
-                '''
-            }
-        }
 
         stage('Build Docker Image') {
             steps {
@@ -39,28 +31,12 @@ pipeline {
             }
         }
 
-        stage('Check Files') {
-            steps {
-                sh """
-                    ls -la
-                    ls -l nginx.conf
-                    cat nginx.conf
-                """
-            }
-        }
-
         stage('Deploy') {
             steps {
                 sh """
-                    if [ ! -f "nginx.conf" ]; then
-                        echo "❌ nginx.conf not found!"
-                        exit 1
-                    fi
-
-                    echo "✅ nginx.conf exists"
-
-                    docker compose down || true
-                    docker compose up -d --build
+                    docker stop $APP_NAME || true
+                    docker rm $APP_NAME || true
+                    docker run -d --name $APP_NAME -p 80:8080 $DOCKER_IMAGE
                 """
             }
         }

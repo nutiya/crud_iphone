@@ -38,6 +38,13 @@ pipeline {
                 sh "docker push $DOCKER_IMAGE"
             }
         }
+        
+        stage('Check Files') {
+            steps {
+                sh 'ls -la'
+                sh 'cat nginx.conf'
+            }
+        }
 
         stage('Deploy') {
             steps {

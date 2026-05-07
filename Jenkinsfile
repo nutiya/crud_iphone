@@ -38,17 +38,27 @@ pipeline {
                 sh "docker push $DOCKER_IMAGE"
             }
         }
-        
+
         stage('Check Files') {
             steps {
-                sh 'ls -la'
-                sh 'cat nginx.conf'
+                sh '''
+                    ls -la
+                    file nginx.conf        # shows if it's a file or directory
+                    cat nginx.conf
+                '''
             }
         }
 
         stage('Deploy') {
             steps {
                 sh """
+                    # Verify nginx.conf exists as a FILE before deploying
+                    if [ ! -f "\$(pwd)/nginx.conf" ]; then
+                        echo "❌ nginx.conf not found or is not a file!"
+                        exit 1
+                    fi
+                    echo "✅ nginx.conf found: \$(ls -la nginx.conf)"
+                    
                     docker compose down || true
                     docker compose up -d --build
                 """

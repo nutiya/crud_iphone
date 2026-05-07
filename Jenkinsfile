@@ -5,7 +5,6 @@ pipeline {
         APP_NAME    = "spring-app"
         DOCKER_IMAGE = "phalraksa/spring-app:latest"
         DOCKER_CREDS = "dockerhub-creds"
-        KUBECONFIG   = credentials('kubeconfig')   // ← add kubeconfig credential in Jenkins
     }
 
     stages {
@@ -34,26 +33,21 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
             steps {
-                sh """
-                    export KUBECONFIG=$KUBECONFIG
-
-                    # Apply config (order matters)
-                    kubectl apply -f k8s/secret.yaml
-                    kubectl apply -f k8s/configmap.yaml
-                    kubectl apply -f k8s/postgres-deployment.yaml
-                    kubectl apply -f k8s/postgres-service.yaml
-
-                    # Wait for postgres to be ready before deploying app
-                    kubectl rollout status deployment/postgres --timeout=120s
-
-                    kubectl apply -f k8s/app-deployment.yaml
-                    kubectl apply -f k8s/app-service.yaml
-                    kubectl apply -f k8s/ingress.yaml
-
-                    # Force pull the new image
-                    kubectl rollout restart deployment/spring-app
-                    kubectl rollout status deployment/spring-app --timeout=120s
-                """
+                withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
+                    sh """
+                        export KUBECONFIG=$KUBECONFIG
+                        kubectl apply -f k8s/secret.yaml
+                        kubectl apply -f k8s/configmap.yaml
+                        kubectl apply -f k8s/postgres-deployment.yaml
+                        kubectl apply -f k8s/postgres-service.yaml
+                        kubectl rollout status deployment/postgres --timeout=120s
+                        kubectl apply -f k8s/app-deployment.yaml
+                        kubectl apply -f k8s/app-service.yaml
+                        kubectl apply -f k8s/ingress.yaml
+                        kubectl rollout restart deployment/spring-app
+                        kubectl rollout status deployment/spring-app --timeout=120s
+                    """
+                }
             }
         }
     }

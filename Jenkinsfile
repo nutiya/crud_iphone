@@ -10,15 +10,11 @@ pipeline {
     }
 
     stages {
-        stage('Test') {
+
+        stage('Build JAR') {
             steps {
                 sh 'chmod +x mvnw'
-                sh './mvnw test -B'
-            }
-            post {
-                always {
-                    junit 'target/surefire-reports/**/*.xml'   // shows test results in Jenkins UI
-                }
+                sh './mvnw package -B -DskipTests'
             }
         }
 

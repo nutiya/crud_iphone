@@ -12,6 +12,7 @@ pipeline {
     stages {
         stage('Test') {
             steps {
+                sh 'chmod +x mvnw'
                 sh './mvnw test -B'
             }
             post {
@@ -53,7 +54,7 @@ pipeline {
                         kubectl apply -f k8s/postgres-statefulset.yaml
                         kubectl rollout status statefulset/postgres --timeout=120s
                         kubectl apply -f k8s/postgres-service.yaml
-                        kubectl rollout status deployment/postgres --timeout=120s
+                        kubectl rollout status statefulset/postgres --timeout=120s
                         kubectl apply -f k8s/app-deployment.yaml
                         kubectl apply -f k8s/app-service.yaml
                         kubectl apply -f k8s/ingress.yaml

@@ -34,4 +34,3 @@ build/
 
 # Minikube binary
 minikube-linux-amd64
-k8s/secret.yaml

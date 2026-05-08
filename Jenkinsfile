@@ -10,6 +10,16 @@ pipeline {
     }
 
     stages {
+        stage('Test') {
+            steps {
+                sh './mvnw test -B'
+            }
+            post {
+                always {
+                    junit 'target/surefire-reports/**/*.xml'   // shows test results in Jenkins UI
+                }
+            }
+        }
 
         stage('Build Docker Image') {
             steps {
@@ -38,10 +48,10 @@ pipeline {
                 withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
                     sh '''
                         export KUBECONFIG=$KUBECONFIG
-                        kubectl apply -f k8s/secret.yaml
+                        kubectl apply -f k8s/namespace.yaml
                         kubectl apply -f k8s/configmap.yaml
-                        kubectl apply -f k8s/postgres-pvc.yaml
-                        kubectl apply -f k8s/postgres-deployment.yaml
+                        kubectl apply -f k8s/postgres-statefulset.yaml
+                        kubectl rollout status statefulset/postgres --timeout=120s
                         kubectl apply -f k8s/postgres-service.yaml
                         kubectl rollout status deployment/postgres --timeout=120s
                         kubectl apply -f k8s/app-deployment.yaml
@@ -57,7 +67,13 @@ pipeline {
     }
 
     post {
-        success { echo "✅ Build, push, and Kubernetes deployment successful!" }
-        failure { echo "❌ Pipeline failed" }
+        success {
+            echo "✅ Deployed ${IMAGE_TAG} successfully"
+            // slackSend channel: '#deployments', message: "✅ spring-app:${IMAGE_TAG} deployed"
+        }
+        failure {
+            echo "❌ Deployment of ${IMAGE_TAG} failed — rolled back"
+            // slackSend channel: '#deployments', message: "❌ spring-app:${IMAGE_TAG} failed"
+        }
     }
 }

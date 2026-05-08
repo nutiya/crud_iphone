@@ -4,6 +4,11 @@ metadata:
   name: spring-app
 spec:
   replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1        # spin up 1 extra pod during deploy
+      maxUnavailable: 0  # never kill old pod until new one is ready
   selector:
     matchLabels:
       app: spring-app

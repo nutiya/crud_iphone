@@ -16,6 +16,9 @@ spec:
         - name: postgres
           image: postgres:16-alpine
           imagePullPolicy: Always
+          volumeMounts:
+            - name: postgres-storage
+              mountPath: /var/lib/postgresql/data
           ports:
             - containerPort: 5432
           env:
@@ -34,3 +37,14 @@ spec:
                 secretKeyRef:
                   name: postgres-secret
                   key: POSTGRES_PASSWORD
+          resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+      volumes:
+        - name: postgres-storage
+          persistentVolumeClaim:
+            claimName: postgres-pvc

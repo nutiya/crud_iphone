@@ -2,8 +2,10 @@ pipeline {
     agent { label 'built-in' }
 
     environment {
-        APP_NAME    = "spring-app"
-        DOCKER_IMAGE = "phalraksa/spring-app:latest"
+        APP_NAME     = "spring-app"
+        IMAGE_REPO   = "phalraksa/spring-app"
+        IMAGE_TAG    = "${env.GIT_COMMIT[0..6]}"   // short SHA e.g. a3f91bc
+        DOCKER_IMAGE = "${IMAGE_REPO}:${IMAGE_TAG}"
         DOCKER_CREDS = "dockerhub-creds"
     }
 
@@ -38,14 +40,16 @@ pipeline {
                         export KUBECONFIG=$KUBECONFIG
                         kubectl apply -f k8s/secret.yaml
                         kubectl apply -f k8s/configmap.yaml
+                        kubectl apply -f k8s/postgres-pvc.yaml
                         kubectl apply -f k8s/postgres-deployment.yaml
                         kubectl apply -f k8s/postgres-service.yaml
                         kubectl rollout status deployment/postgres --timeout=120s
                         kubectl apply -f k8s/app-deployment.yaml
                         kubectl apply -f k8s/app-service.yaml
                         kubectl apply -f k8s/ingress.yaml
-                        kubectl rollout restart deployment/spring-app
-                        kubectl rollout status deployment/spring-app --timeout=120s
+                        kubectl set image deployment/spring-app spring-app=${DOCKER_IMAGE}
+                        kubectl rollout status deployment/spring-app --timeout=120s || \
+                            (kubectl rollout undo deployment/spring-app && exit 1)
                     '''
                 }
             }

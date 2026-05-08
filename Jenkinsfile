@@ -49,18 +49,19 @@ pipeline {
                         # namespace has no -n flag (it defines the namespace itself)
                         kubectl apply -f k8s/namespace.yaml
 
+                        # everything else targets prod
                         kubectl apply -f k8s/secret.yaml
                         kubectl apply -f k8s/configmap.yaml
                         kubectl apply -f k8s/postgres-statefulset.yaml
-                        kubectl rollout status statefulset/postgres     --timeout=120s
+                        kubectl rollout status statefulset/postgres     -n prod --timeout=120s
                         kubectl apply -f k8s/postgres-service.yaml
                         kubectl apply -f k8s/app-deployment.yaml
                         kubectl apply -f k8s/app-service.yaml
                         kubectl apply -f k8s/ingress.yaml
                         kubectl apply -f k8s/hpa.yaml
-                        kubectl set image deployment/spring-app spring-app=${DOCKER_IMAGE}
-                        kubectl rollout status deployment/spring-app    --timeout=120s || \
-                            (kubectl rollout undo deployment/spring-app && exit 1)
+                        kubectl set image deployment/spring-app spring-app=${DOCKER_IMAGE} -n prod
+                        kubectl rollout status deployment/spring-app    -n prod --timeout=120s || \
+                            (kubectl rollout undo deployment/spring-app -n prod && exit 1)
                     '''
                 }
             }

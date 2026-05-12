@@ -1,5 +1,5 @@
 pipeline {
-    
+
     agent any
 
     environment {
@@ -9,7 +9,7 @@ pipeline {
         DOCKER_IMAGE = "${IMAGE_REPO}:${IMAGE_TAG}"
         DOCKER_CREDS = "dockerhub-creds"
         HELM_RELEASE = "crud-iphone"
-        HELM_CHART   = "./helm/crud-iphone"
+        HELM_CHART   = "./helm"
         NAMESPACE    = "prod"
     }
 

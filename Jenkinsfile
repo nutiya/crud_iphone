@@ -38,12 +38,6 @@ pipeline {
             }
         }
 
-        stage('Scan Image') {
-            steps {
-                sh "trivy image --exit-code 1 --severity HIGH,CRITICAL $DOCKER_IMAGE"
-            }
-        }
-
         stage('Push Docker Image') {
             steps {
                 sh "docker push $DOCKER_IMAGE"

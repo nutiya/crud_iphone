@@ -22,6 +22,12 @@ pipeline {
             }
         }
 
+        stage('Test') {
+            steps {
+                sh './mvnw test'
+            }
+        }
+
         stage('Build Docker Image') {
             steps {
                 sh "docker build -t $DOCKER_IMAGE ."
@@ -35,6 +41,12 @@ pipeline {
                     passwordVariable: 'PASS')]) {
                     sh 'echo $PASS | docker login -u $USER --password-stdin'
                 }
+            }
+        }
+
+        stage('Scan Image') {
+            steps {
+                sh "trivy image --exit-code 1 --severity HIGH,CRITICAL $DOCKER_IMAGE"
             }
         }
 

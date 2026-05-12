@@ -5,6 +5,7 @@ metadata:
   namespace: {{ .Values.namespace }}
 spec:
   replicas: {{ .Values.springApp.replicas }}
+  revisionHistoryLimit: 3 
   strategy:
     type: RollingUpdate
     rollingUpdate:

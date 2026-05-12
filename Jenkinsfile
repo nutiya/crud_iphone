@@ -1,5 +1,5 @@
 pipeline {
-    agent { label 'built-in' }
+    agent any
 
     environment {
         APP_NAME     = "spring-app"
@@ -7,6 +7,9 @@ pipeline {
         IMAGE_TAG    = "${env.GIT_COMMIT[0..6]}"   // short SHA e.g. a3f91bc
         DOCKER_IMAGE = "${IMAGE_REPO}:${IMAGE_TAG}"
         DOCKER_CREDS = "dockerhub-creds"
+        HELM_RELEASE = "crud-iphone"
+        HELM_CHART   = "./helm/crud-iphone"
+        NAMESPACE    = "prod"
     }
 
     stages {
@@ -40,28 +43,22 @@ pipeline {
             }
         }
 
-        stage('Deploy to Kubernetes') {
+        stage('Deploy to Kubernetes (Helm)') {
             steps {
-                withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
+                withCredentials([
+                    file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG'),
+                    string(credentialsId: 'postgres-password', variable: 'DB_PASS')
+                ]) {
                     sh '''
                         export KUBECONFIG=$KUBECONFIG
 
-                        # namespace has no -n flag (it defines the namespace itself)
-                        kubectl apply -f k8s/namespace.yaml
-
-                        # everything else targets prod
-                        kubectl apply -f k8s/secret.yaml
-                        kubectl apply -f k8s/configmap.yaml
-                        kubectl apply -f k8s/postgres-statefulset.yaml
-                        kubectl rollout status statefulset/postgres     -n prod --timeout=120s
-                        kubectl apply -f k8s/postgres-service.yaml
-                        kubectl apply -f k8s/app-deployment.yaml
-                        kubectl apply -f k8s/app-service.yaml
-                        kubectl apply -f k8s/ingress.yaml
-                        kubectl apply -f k8s/hpa.yaml
-                        kubectl set image deployment/spring-app spring-app=${DOCKER_IMAGE} -n prod
-                        kubectl rollout status deployment/spring-app    -n prod --timeout=120s || \
-                            (kubectl rollout undo deployment/spring-app -n prod && exit 1)
+                        helm upgrade --install $HELM_RELEASE $HELM_CHART \
+                            --namespace $NAMESPACE \
+                            --create-namespace \
+                            --set springApp.tag=$IMAGE_TAG \
+                            --set secret.postgresPassword=$DB_PASS \
+                            --atomic \
+                            --timeout 3m
                     '''
                 }
             }
@@ -70,10 +67,10 @@ pipeline {
 
     post {
         success {
-            echo "✅ Deployed ${IMAGE_TAG} to namespace prod successfully"
+            echo "✅ Deployed ${IMAGE_TAG} to namespace ${NAMESPACE} successfully"
         }
         failure {
-            echo "❌ Deployment of ${IMAGE_TAG} failed — rolled back"
+            echo "❌ Deployment of ${IMAGE_TAG} failed — Helm rolled back automatically"
         }
     }
 }

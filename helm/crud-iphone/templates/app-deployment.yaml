@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spring-app
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: {{ .Values.springApp.replicas }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: {{ .Values.springApp.rollingUpdate.maxSurge }}
+      maxUnavailable: {{ .Values.springApp.rollingUpdate.maxUnavailable }}
+  selector:
+    matchLabels:
+      app: spring-app
+  template:
+    metadata:
+      labels:
+        app: spring-app
+    spec:
+      containers:
+        - name: spring-app
+          image: "{{ .Values.springApp.image }}:{{ .Values.springApp.tag }}"
+          imagePullPolicy: {{ .Values.springApp.imagePullPolicy }}
+          ports:
+            - containerPort: {{ .Values.springApp.port }}
+          resources:
+            requests:
+              memory: {{ .Values.springApp.resources.requests.memory | quote }}
+              cpu: {{ .Values.springApp.resources.requests.cpu | quote }}
+            limits:
+              memory: {{ .Values.springApp.resources.limits.memory | quote }}
+              cpu: {{ .Values.springApp.resources.limits.cpu | quote }}
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: {{ .Values.springApp.datasource.url | quote }}
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: POSTGRES_USER
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.springApp.readinessProbe.path }}
+              port: {{ .Values.springApp.port }}
+            initialDelaySeconds: {{ .Values.springApp.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.springApp.readinessProbe.periodSeconds }}
+            failureThreshold: {{ .Values.springApp.readinessProbe.failureThreshold }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.springApp.livenessProbe.path }}
+              port: {{ .Values.springApp.port }}
+            initialDelaySeconds: {{ .Values.springApp.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.springApp.livenessProbe.periodSeconds }}
+            failureThreshold: {{ .Values.springApp.livenessProbe.failureThreshold }}

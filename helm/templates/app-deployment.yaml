@@ -33,6 +33,8 @@ spec:
               memory: {{ .Values.springApp.resources.limits.memory | quote }}
               cpu: {{ .Values.springApp.resources.limits.cpu | quote }}
           env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: {{ .Values.springApp.profiles.active}}
             - name: SPRING_DATASOURCE_URL
               value: {{ .Values.springApp.datasource.url | quote }}
             - name: SPRING_DATASOURCE_USERNAME

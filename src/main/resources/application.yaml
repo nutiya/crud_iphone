@@ -1,35 +1,32 @@
 spring:
+  profiles:
+    active: local
   application:
     name: crudStudent
 
-  datasource:
-    url: ${SPRING_DATASOURCE_URL}
-    username: ${SPRING_DATASOURCE_USERNAME}
-    password: ${SPRING_DATASOURCE_PASSWORD}
-    hikari:
-      initialization-fail-timeout: 0
-      connection-timeout: 30000
-      max-lifetime: 1800000
-
-  jpa:
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
 management:
   endpoints:
     web:
       exposure:
-        include: health
+        include: health,prometheus,info
+
   endpoint:
     health:
       probes:
         enabled: true
+      show-details: always
+
   health:
     livenessState:
       enabled: true
     readinessState:
       enabled: true
+
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+
+  metrics:
+    tags:
+      application: crud-iphone

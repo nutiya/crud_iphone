@@ -21,6 +21,10 @@ pipeline {
 
         stage('Build JAR') {
             steps {
+                script {
+                    env.IMAGE_TAG = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
+                    env.DOCKER_IMAGE = "${env.IMAGE_REPO}:${env.IMAGE_TAG}"
+                }
                 sh 'chmod +x mvnw'
                 sh './mvnw package -B -DskipTests'
             }
@@ -76,6 +80,10 @@ pipeline {
         }
         failure {
             echo "❌ Deployment of ${IMAGE_TAG} failed — Helm rolled back automatically"
+        }
+        always {
+            sh 'docker logout || true'
+            cleanWs()
         }
     }
 }

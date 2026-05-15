@@ -3,9 +3,12 @@ kind: Service
 metadata:
   name: spring-app-service
   namespace: {{ .Values.namespace }}
+  labels:
+    app: spring-app
 spec:
   selector:
     app: spring-app
   ports:
-    - port: {{ .Values.springApp.servicePort }}
+    - name: http
+      port: {{ .Values.springApp.servicePort }}
       targetPort: {{ .Values.springApp.port }}

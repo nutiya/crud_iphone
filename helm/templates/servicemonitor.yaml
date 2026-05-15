@@ -1,0 +1,18 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: spring-monitor
+  namespace: monitoring          # must be in monitoring namespace, not prod
+  labels:
+    release: monitoring          # must match Prometheus serviceMonitorSelector
+spec:
+  namespaceSelector:
+    matchNames:
+      - {{ .Values.namespace }}  # tells Prometheus to look in prod namespace
+  selector:
+    matchLabels:
+      app: spring-app
+  endpoints:
+    - port: http
+      path: /actuator/prometheus
+      interval: 15s

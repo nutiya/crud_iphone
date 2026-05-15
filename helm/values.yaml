@@ -7,6 +7,8 @@ springApp:
   replicas: 1
   port: 8080
   servicePort: 80
+  profiles:
+    active: prod
   resources:
     requests:
       memory: "256Mi"
@@ -18,13 +20,13 @@ springApp:
     url: jdbc:postgresql://postgres:5432/iphoneDB
   readinessProbe:
     path: /actuator/health/readiness
-    initialDelaySeconds: 40
+    initialDelaySeconds: 60
     periodSeconds: 10
     failureThreshold: 5
 
   livenessProbe:
     path: /actuator/health/liveness
-    initialDelaySeconds: 90
+    initialDelaySeconds: 120
     periodSeconds: 15
     failureThreshold: 3
   rollingUpdate:

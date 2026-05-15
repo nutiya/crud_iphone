@@ -50,7 +50,7 @@ spec:
           startupProbe:
             httpGet:
               path: /actuator/health
-              port: { { .Values.springApp.port } }
+              port: {{ .Values.springApp.port }}
             failureThreshold: 30
             periodSeconds: 10
           readinessProbe:

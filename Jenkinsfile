@@ -67,7 +67,7 @@ pipeline {
                             --set springApp.tag=$IMAGE_TAG \
                             --set secret.postgresPassword=$DB_PASS \
                             --atomic \
-                            --timeout 3m
+                            --timeout 10m
                     '''
                 }
             }
